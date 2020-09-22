@@ -143,17 +143,6 @@ void server_list::post_unpack()
 
 		server_count = 0;
 	});
-	
-	command::add("lui_open", [](command::params params)
-	{
-		if (params.size() <= 1)
-		{
-			game_console::print(7, "usage: lui_open <name>\n");
-			return;
-		}
-
-		game::native::LUI_OpenMenu(0, params[1], 1, 0, 0);
-	});
 }
 
 REGISTER_MODULE(server_list);
