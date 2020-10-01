@@ -15,7 +15,7 @@ namespace
 	utils::hook::detour load_lua_file_asset_hook;
 	std::unordered_map<std::string, std::string> lua_buffer;
 
-	void load_lua_file_asset(game::native::LuaFile** file)
+	void load_lua_file_asset(game::LuaFile** file)
 	{
 		auto* lua_file = *file;
 
@@ -49,7 +49,7 @@ public:
 	
 	void post_unpack() override
 	{
-		if (game::is_dedi()) return;
+		if (game::environment::is_dedi()) return;
 
 		command::add("lui_open", [](command::params params)
 		{
@@ -59,7 +59,7 @@ public:
 				return;
 			}
 
-			game::native::LUI_OpenMenu(0, params[1], 1, 0, 0);
+			game::LUI_OpenMenu(0, params[1], 1, 0, 0);
 		});
 
 		load_lua_file_asset_hook.create(0x140325C70, &load_lua_file_asset);
