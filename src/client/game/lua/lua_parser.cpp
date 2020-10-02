@@ -25,7 +25,7 @@ namespace game::lua
 					throw std::runtime_error("Buffer overrun.");
 				}
 
-				std::memmove(buffer, buffer_.data(), size);
+				std::memmove(buffer, buffer_.data() + offset_, size);
 				offset_ += size;
 			}
 
