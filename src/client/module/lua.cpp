@@ -42,7 +42,7 @@ public:
 	void post_start() override
 	{
 #if DEV_BUILD
-		const auto file = utils::io::read_file("cacloadoututils.lua");
+		const auto file = utils::io::read_file("systemlinkjoinmenu.lua");
 		game::lua::script::parse(file);
 #endif
 	}

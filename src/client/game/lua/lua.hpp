@@ -4,25 +4,38 @@
 
 namespace game::lua
 {
+#define HKS_DUMP_SIGNATURE "\x1BLua"
+#define LUA_VERSION 81
+#define FORMAT_VERSION 13
+
+	enum build_settings : uint8_t
+	{
+		HKS_GETGLOBAL_MEMOIZATION = 0x1,
+		HKS_STRUCTURE_EXTENSION_ON = 0x2,
+		HKS_SELF = 0x4,
+		HKS_WITHDOUBLES = 0x8,
+		HKS_WITHNATIVEINT = 0x10
+	};
+
 #pragma pack(push)
 #pragma pack(1)
 	struct header
 	{
-		uint8_t magic[4];
-
+		uint8_t dump_signature[4];
 		uint8_t lua_version;
-		uint8_t compiler_version;
-		uint8_t endianness;
-		uint8_t size_of_int;
-		uint8_t size_of_size_t;
-		uint8_t size_of_instruction;
-		uint8_t size_of_lua_number;
+		uint8_t format_version;
+		uint8_t is_little_endian;
+		uint8_t int_size;
+		uint8_t size_t_size;
+		uint8_t instruction_size;
+		uint8_t number_size;
 		uint8_t integral_flag;
-
-		uint8_t pad[5];
-		uint8_t constant_type_count;
+		uint8_t build_settings;
+		bool referenced_bytecode;
 	};
 #pragma pack(pop)
+
+	class reader;
 
 	class script
 	{
@@ -42,7 +55,9 @@ namespace game::lua
 
 	private:
 		header header_{};
+		uint32_t constant_type_count;
 
 		script() = default;
+		void parse_header(reader& r);
 	};
 }
