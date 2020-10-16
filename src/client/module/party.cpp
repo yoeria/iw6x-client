@@ -5,7 +5,6 @@
 #include "command.hpp"
 #include "network.hpp"
 
-#include "utils/hook.hpp"
 #include "utils/cryptography.hpp"
 
 namespace party
@@ -33,11 +32,6 @@ namespace party
 			reinterpret_cast<void(*)(int, char*, const game::netadr_s*, const char*, const char*)>(0x1402C5700)(
 				0, session_info, &target, mapname.data(), gametype.data());
 		}
-
-		void load_new_map_stub(const char* map, const char* gametype)
-		{
-			connect_to_party(*reinterpret_cast<game::netadr_s*>(0x141CB535C), map, gametype);
-		}
 	}
 
 	void connect(const game::netadr_s& target)
@@ -63,11 +57,6 @@ namespace party
 				return;
 			}
 
-			// Hook CL_SetupForNewServerMap
-			// The server seems to kick us after a map change
-			// This fix is pretty bad, but it works for now
-			utils::hook::jump(0x1402C9F60, &load_new_map_stub);
-
 			command::add("map", [](command::params& argument)
 			{
 				if (argument.size() != 2)
@@ -75,7 +64,7 @@ namespace party
 					return;
 				}
 
-				game::SV_StartMap(0, argument[1], false);
+				game::SV_StartMapForParty(0, argument[1], false, false);
 			});
 
 			command::add("connect", [](command::params& argument)

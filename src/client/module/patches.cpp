@@ -4,6 +4,7 @@
 #include "game_console.hpp"
 #include "game/game.hpp"
 #include "game/dvars.hpp"
+#include "filesystem.hpp"
 
 #include "utils/hook.hpp"
 #include "utils/nt.hpp"
@@ -52,6 +53,59 @@ namespace patches
 			// changed max value from 2.0f -> 5.0f and min value from 0.5f -> 0.1f
 			return game::Dvar_RegisterFloat(name, 1.0f, 0.1f, 5.0f, 0x1, desc);
 		}
+
+		bool cmd_exec_patch()
+		{
+			command::params exec_params;
+			if (exec_params.size() == 2)
+			{
+				std::string file_name = exec_params.get(1);
+				if (file_name.find(".cfg") == std::string::npos)
+					file_name.append(".cfg");
+
+				const auto file = filesystem::file(file_name);
+				if (file.exists())
+				{
+					game::Cbuf_ExecuteBufferInternal(0, 0, file.get_buffer().data(), game::Cmd_ExecuteSingleCommand);
+				}				
+			}
+
+			return false;
+		}
+
+		auto cmd_exec_stub_mp = utils::hook::assemble([](utils::hook::assembler& a)
+		{
+			const auto success = a.newLabel();
+
+			a.pushad64();
+			a.call(cmd_exec_patch);
+			a.test(al, al);
+			a.popad64();
+
+			a.jnz(success);
+			a.mov(edx, 0x18000);
+			a.jmp(0x1403F7530);
+
+			a.bind(success);
+			a.jmp(0x1403F7574);
+		});
+
+		auto cmd_exec_stub_sp = utils::hook::assemble([](utils::hook::assembler& a)
+		{
+			const auto success = a.newLabel();
+
+			a.pushad64();
+			a.call(cmd_exec_patch);
+			a.test(al, al);
+			a.popad64();
+
+			a.jnz(success);
+			a.mov(edx, 0x18000);
+			a.jmp(0x1403B39C0);
+
+			a.bind(success);
+			a.jmp(0x1403B3A04);
+		});
 	}
 
 	class module final : public module_interface
@@ -103,6 +157,13 @@ namespace patches
 			game::Dvar_RegisterInt("cg_gun_y", 0, 0, 0, 0, "Right position of the viewmodel");
 			game::Dvar_RegisterInt("cg_gun_z", 0, 0, 0, 0, "Up position of the viewmodel");
 
+
+			if (!game::environment::is_sp())
+			{
+				//increased max limit for sv_network_fps, the lower limit is the default one. Original range is from 20 to 200 times a second.
+				game::Dvar_RegisterInt("sv_network_fps", 1000, 20, 1000, 0, "Number of times per second the server checks for net messages");
+			}
+
 			command::add("dvarDump", []()
 			{
 				game_console::print(
@@ -139,6 +200,9 @@ namespace patches
 				game_console::print(
 					7, "================================ END COMMAND DUMP =================================\n");
 			});
+
+			// Allow executing custom cfg files with the "exec" command
+			utils::hook::jump(SELECT_VALUE(0x1403B39BB, 0x1403F752B), SELECT_VALUE(cmd_exec_stub_sp, cmd_exec_stub_mp), true);
 
 			if (game::environment::is_sp())
 			{
