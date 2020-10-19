@@ -98,7 +98,6 @@ namespace map_rotation
 				}
 			}
 
-
 			launch_default_map();
 		}
 
