@@ -16,3 +16,4 @@
 
 #define TLS_DLL               309
 #define RUNNER                310
+#define WEBVIEW_2_LOADER      311

@@ -108,6 +108,8 @@ RUNNER                RCDATA "../../build/bin/x64/Debug/runner.exe"
 RUNNER                RCDATA "../../build/bin/x64/Release/runner.exe"
 #endif
 
+WEBVIEW_2_LOADER      RCDATA "../../deps/webview/dll/x64/WebView2Loader.dll"
+
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 

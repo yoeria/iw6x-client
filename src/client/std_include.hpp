@@ -8,9 +8,11 @@
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4127)
 #pragma warning(disable: 4244)
+#pragma warning(disable: 4267)
 #pragma warning(disable: 4458)
 #pragma warning(disable: 4702)
 #pragma warning(disable: 4996)
+#pragma warning(disable: 5205)
 #pragma warning(disable: 5054)
 #pragma warning(disable: 6011)
 #pragma warning(disable: 6297)
@@ -77,6 +79,8 @@
 #include <udis86.h>
 #include <MinHook.h>
 #include <tomcrypt.h>
+
+#include <webview.h>
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>

@@ -1,9 +1,73 @@
 #include <std_include.hpp>
 #include "launcher.hpp"
+#include "utils/binary_resource.hpp"
 #include "utils/nt.hpp"
+
+namespace
+{
+	const utils::nt::module& get_webiew_2_loader()
+	{
+		static utils::binary_resource webview_2_loader(WEBVIEW_2_LOADER, "WebView2Loader.dll");
+		static const auto loader = utils::nt::module::load(webview_2_loader.get_extracted_file());
+		return loader;
+	}
+
+	struct lul
+	{
+		lul()
+		{
+			get_webiew_2_loader();
+		}
+	} _;
+}
+
+HRESULT WINAPI CreateCoreWebView2EnvironmentWithOptions(PCWSTR browserExecutableFolder, PCWSTR userDataFolder,
+                                                        ICoreWebView2EnvironmentOptions* environmentOptions,
+                                                        ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler*
+                                                        environment_created_handler)
+{
+	return get_webiew_2_loader().invoke_pascal<HRESULT>("CreateCoreWebView2EnvironmentWithOptions",
+	                                                    browserExecutableFolder,
+	                                                    userDataFolder, environmentOptions,
+	                                                    environment_created_handler);
+}
+
+std::string url_encode(const std::string& value)
+{
+	std::ostringstream escaped;
+	escaped.fill('0');
+	escaped << std::hex;
+
+	for (auto i = value.begin(), n = value.end(); i != n; ++i)
+	{
+		const std::string::value_type c = (*i);
+
+		// Keep alphanumeric and other accepted characters intact
+		if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+		{
+			escaped << c;
+			continue;
+		}
+
+		// Any other characters are percent-encoded
+		escaped << std::uppercase;
+		escaped << '%' << std::setw(2) << int(static_cast<unsigned char>(c));
+		escaped << std::nouppercase;
+	}
+
+	return escaped.str();
+}
 
 launcher::launcher()
 {
+	{
+		webview::webview w(true, nullptr);
+		w.set_title("IW6x");
+		w.set_size(750, 420 - 38, WEBVIEW_HINT_FIXED);
+		w.navigate("data:text/html," + url_encode(load_content(MENU_MAIN)));
+		w.run();
+	}
+
 	this->create_main_menu();
 }
 
