@@ -21,6 +21,7 @@ namespace scheduler
 		std::thread thread;
 		utils::concurrent_list<task> callbacks;
 		utils::hook::detour r_end_frame_hook;
+		tbb::concurrent_vector<task> new_callbacks; // TODO: Use that
 
 		void execute(const pipeline type)
 		{

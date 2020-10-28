@@ -86,6 +86,8 @@
 #include <asmjit/core/jitruntime.h>
 #include <asmjit/x86/x86assembler.h>
 
+#include <tbb/concurrent_vector.h>
+
 #include "proto/network.pb.h"
 
 #pragma warning(pop)

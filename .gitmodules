@@ -32,3 +32,6 @@
 [submodule "deps/discord-rpc"]
 	path = deps/discord-rpc
 	url = https://github.com/discord/discord-rpc.git
+[submodule "deps/oneTBB"]
+	path = deps/oneTBB
+	url = https://github.com/oneapi-src/oneTBB
